@@ -328,7 +328,7 @@ footer b{color:#fff}
 /* ===== CONFIGURE AQUI ===== */
 var PRECO = "29,90";          /* preço da promoção */
 var PRECO_ANTIGO = "49,90";   /* preço cheio, que volta a valer em 21/12/2026 */
-var CHECKOUT_URL = "#oferta"; /* cole aqui o link do checkout da Hotmart/Kiwify */
+var CHECKOUT_URL = "https://pay.hotmart.com/Q108673332H?checkoutMode=2"; /* cole aqui o link do checkout da Hotmart/Kiwify */
 var PROMO_FIM = new Date("2026-12-20T23:59:59-03:00").getTime(); /* fim da promoção, horário de Brasília */
 /* ========================== */
 function num(v){return parseFloat(v.replace(/\./g,"").replace(",","."))}
@@ -353,7 +353,7 @@ function tick(){
   document.querySelectorAll('[data-cd-inline]').forEach(function(e){e.textContent=txt});
 }
 tick(); window.__cd=setInterval(tick,1000);
-document.querySelectorAll('[data-checkout]').forEach(function(a){ a.setAttribute('href', CHECKOUT_URL); });
+document.querySelectorAll('[data-checkout]').forEach(function(a){ a.setAttribute('href', CHECKOUT_URL); a.classList.add('hotmart-fb','hotmart__button-checkout'); });
 </script>
 <!-- Selo "Powered by Netlify": quando ele aparece no canto, a barra fixa do celular ganha espaço embaixo para o botão de compra não ficar coberto. -->
 <script>
@@ -374,6 +374,30 @@ document.querySelectorAll('[data-checkout]').forEach(function(a){ a.setAttribute
   new MutationObserver(ajustar).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
   window.addEventListener('resize', ajustar);
   ajustar();
+})();
+</script>
+<!-- Widget de checkout Hotmart: no computador, o pagamento abre por cima da página; no celular, abre o checkout normal.
+     Proteção: se o widget falhar (ex.: bloqueador de anúncios), ele apaga os links da Hotmart; aqui os botões são devolvidos como links normais. -->
+<script>
+(function(){
+  var botoes = [].slice.call(document.querySelectorAll('a.hotmart-fb')).map(function(a){
+    return { el: a, pai: a.parentNode, prox: a.nextSibling };
+  });
+  new MutationObserver(function(){
+    botoes.forEach(function(b){
+      if (!b.el.isConnected && b.pai && b.pai.isConnected) {
+        b.el.classList.remove('hotmart-fb', 'hotmart__button-checkout');
+        b.pai.insertBefore(b.el, b.prox && b.prox.parentNode === b.pai ? b.prox : null);
+      }
+    });
+  }).observe(document.body, { childList: true, subtree: true });
+  var js = document.createElement('script');
+  js.src = 'https://static.hotmart.com/checkout/widget.min.js';
+  document.head.appendChild(js);
+  var css = document.createElement('link');
+  css.rel = 'stylesheet'; css.type = 'text/css';
+  css.href = 'https://static.hotmart.com/css/hotmart-fb.min.css';
+  document.head.appendChild(css);
 })();
 </script>
 </body>
